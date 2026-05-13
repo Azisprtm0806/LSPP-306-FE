@@ -38,7 +38,6 @@ const Footer = () => {
           </div>
 
           <div className="md:pl-20">
-            <h3 className="text-2xl font-bold mb-8">Sosial Media</h3>
             <ul className="space-y-4">
               <li>
                 <a
