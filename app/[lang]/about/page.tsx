@@ -1,6 +1,7 @@
 "use client";
+
+import { useState, useEffect, use } from "react";
 import Footer from "@/components/Footer";
-import Navigation from "@/components/navigation";
 import Image from "next/image";
 
 import { Linkedin, Instagram } from "lucide-react";
@@ -9,13 +10,32 @@ import TUKCard from "./TUKCard";
 import AsesorCard from "./AsesorCard";
 import AsesiSection from "./AsesiSection";
 import FloatingContact from "@/components/FloatingContact";
+import Navigation from "@/components/navigation";
+import { getDictionary } from "../dictionaries";
 
-export default function AboutPage() {
+interface AboutPageProps {
+  params: Promise<{ lang: "id" | "en" }>;
+}
+
+export default function AboutPage({ params }: AboutPageProps) {
+  const resolvedParams = use(params);
+  const lang = resolvedParams.lang;
+  const [dict, setDict] = useState<any>(null);
+
+  useEffect(() => {
+    getDictionary(lang).then((data) => {
+      setDict(data);
+    });
+  }, [lang]);
+
+  if (!dict) {
+    return <div className="min-h-screen bg-white" />;
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      <Navigation />
+      <Navigation lang={lang} dict={dict} />
 
-      {/* Hero Section */}
       <section className="relative w-full min-h-[600px] md:min-h-[750px] flex items-center overflow-hidden bg-[#78B51A]">
         <div className="absolute inset-0 z-0">
           <Image
@@ -25,14 +45,13 @@ export default function AboutPage() {
             className="object-cover object-right"
             priority
           />
-          {/* Gradasi diperhalus agar teks di sisi kiri lebih kontras */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#78B51A] via-[#78B51A] via-[#78B51A]/95 to-transparent to-[85%]" />
         </div>
 
         <div className="relative z-10 w-full px-6 md:px-16 lg:px-24 py-20">
           <div className="max-w-2xl lg:max-w-3xl text-white">
             <h2 className="text-lg md:text-xl font-medium mb-2 opacity-90">
-              Tentang Kami
+              {dict.navigation.about}
             </h2>
 
             <h1 className="text-4xl md:text-6xl font-bold mb-8 leading-[1.1] tracking-tight">
@@ -62,7 +81,7 @@ export default function AboutPage() {
               </p>
 
               <p className="text-base md:text-lg leading-relaxed">
-                Kami percaya bahwa kompetensi yang tersertifikasi adalah fondasi
+                Kami believe bahwa kompetensi yang tersertifikasi adalah fondasi
                 dari karier yang kokoh dan organisasi yang berdaya saing tinggi.
                 <span className="font-bold text-[#facc15]">LSPP 306</span> terus
                 berkomitmen untuk memberikan layanan uji kompetensi yang
@@ -436,13 +455,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Asesi */}
-
       <AsesiSection />
-
-      {/* Footer */}
       <Footer />
-
       <FloatingContact />
     </div>
   );

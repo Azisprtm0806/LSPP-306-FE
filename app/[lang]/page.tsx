@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Bookmark,
@@ -30,6 +30,7 @@ import FloatingContact from "@/components/FloatingContact";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import SertifikasiCard from "@/components/SertifikasiCard";
+import { getDictionary } from "./dictionaries"; // Import helper dictionary
 
 const slides = [
   {
@@ -132,8 +133,21 @@ const SCHEMES_SERTI_DATA = [
   },
 ];
 
-export default function HomePage() {
+interface HomePageProps {
+  params: Promise<{ lang: "id" | "en" }>;
+}
+
+export default function HomePage({ params }: HomePageProps) {
+  const resolvedParams = use(params);
+  const lang = resolvedParams.lang;
+  const [dict, setDict] = useState<any>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    getDictionary(lang).then((data) => {
+      setDict(data);
+    });
+  }, [lang]);
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
@@ -150,9 +164,13 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, [nextSlide]);
 
+  if (!dict) {
+    return <div className="min-h-screen bg-white" />;
+  }
+
   return (
     <div className="min-h-screen bg-white">
-      <Navigation />
+      <Navigation lang={lang} dict={dict} />
 
       <section className="relative bg-[#78B51A] overflow-hidden pt-20 pb-32 min-h-[80vh] flex items-center">
         {slides.map((slide, index) => (
@@ -303,7 +321,7 @@ export default function HomePage() {
               maupun organisasi yang ingin memastikan kualifikasi dan keahlian
               sesuai dengan standar nasional yang berlaku.
             </p>
-            <Link href="/about" className="no-underline">
+            <Link href={`/${lang}/about`} className="no-underline">
               <Button
                 type="button"
                 className="bg-white text-gray-800 hover:text-[#78B51A] hover:bg-gray-50 font-bold px-12 py-6 h-auto text-base rounded-lg shadow-lg border-none transition-all duration-300 hover:shadow-[0_15px_30px_rgba(120,181,26,0.2)] hover:-translate-y-1 active:scale-95 cursor-pointer"
@@ -346,7 +364,7 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-5xl font-bold text-white">
               Berita Terbaru
             </h2>
-            <Link href="/berita">
+            <Link href={`/${lang}/berita`}>
               <Button className="bg-white text-[#78B51A] hover:bg-gray-100 px-8 py-6 rounded-lg font-semibold shadow-md transition-all duration-300 hover:shadow-[0_10px_20px_rgba(120,181,26,0.3)] hover:-translate-y-1">
                 Selengkapnya
               </Button>
@@ -361,9 +379,9 @@ export default function HomePage() {
                 key={index}
                 className="group/card relative inline-block w-[300px] md:w-[350px] bg-white rounded-3xl overflow-hidden shadow-xl flex-shrink-0 cursor-pointer transition-transform duration-300 hover:-translate-y-2"
               >
-                {/* LINK OVERLAY: Membuat seluruh area card bisa di-klik */}
+                {/* LINK OVERLAY */}
                 <Link
-                  href={`/berita/${item}`}
+                  href={`/${lang}/berita/${item}`}
                   className="absolute inset-0 z-10"
                   aria-label="Baca selengkapnya"
                 />
